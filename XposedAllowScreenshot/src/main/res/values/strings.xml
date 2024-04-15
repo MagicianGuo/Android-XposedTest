@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">XposedAllowScreenshot</string>
+    <string name="xposed_description">用于解除应用的截屏限制</string>
+</resources>

@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">XposedChangeView</string>
+    <string name="xposed_description">修改应用XposedTestApp的布局（对其他应用无效）</string>
+</resources>
