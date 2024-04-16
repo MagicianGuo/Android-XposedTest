@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
 }
 
-apply from: "../testks-sign.gradle"
 apply from: "../copy-apk.gradle"
 
 android {
@@ -18,6 +17,25 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    signingConfigs {
+        sign {
+            storeFile file(rootDir.path + "/testks.jks")
+            storePassword "testks"
+            keyAlias "testks"
+            keyPassword "testks"
+        }
+    }
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.sign
+        }
+        release {
+            minifyEnabled true
+            shrinkResources true
+            signingConfig signingConfigs.sign
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
