@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">XposedLogWebViewUrl</string>
+    <string name="xposed_description">记录应用每次用WebView加载网页的链接，并保存到“/sdcard/Android/data/[应用包名]”路径下</string>
+</resources>

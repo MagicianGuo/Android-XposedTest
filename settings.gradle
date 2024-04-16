@@ -29,3 +29,4 @@ rootProject.name = "XposedTest"
 include ':XposedTestApp'
 include ':XposedAllowScreenshot'
 include ':XposedChangeView'
+include ':XposedLogWebViewUrl'
