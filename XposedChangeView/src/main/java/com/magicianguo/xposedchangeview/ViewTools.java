@@ -1,6 +1,6 @@
 package com.magicianguo.xposedchangeview;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -18,11 +18,11 @@ import android.widget.LinearLayout;
 import org.jetbrains.annotations.Nullable;
 
 public class ViewTools {
-    public static View createView(Context context, @Nullable SurfaceView surfaceView) {
+    public static View createView(Activity activity, @Nullable SurfaceView surfaceView, Class<?> clsWebViewActivity) {
         // 获取dpi，便于使用dp为单位的尺寸
-        int dpi = context.getResources().getConfiguration().densityDpi;
+        int dpi = activity.getResources().getConfiguration().densityDpi;
 
-        LinearLayout linearLayout = new LinearLayout(context);
+        LinearLayout linearLayout = new LinearLayout(activity);
         LinearLayout.LayoutParams linearlayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         linearlayoutParams.bottomMargin = 20 * dpi / 160;
         linearLayout.setLayoutParams(linearlayoutParams);
@@ -32,16 +32,15 @@ public class ViewTools {
         linearLayout.setPadding(padding, padding, padding, padding);
         linearLayout.setBackgroundColor(Color.rgb(0xEB, 0xA8, 0xFF));
 
-        Button btn1 = new Button(context);
+        Button btn1 = new Button(activity);
         btn1.setText("打开设置页");
         btn1.setOnClickListener(v -> {
             Intent intent = new Intent(Settings.ACTION_SETTINGS);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
+            activity.startActivity(intent);
         });
         linearLayout.addView(btn1);
 
-        Button btn2 = new Button(context);
+        Button btn2 = new Button(activity);
         btn2.setText("重新绘制SurfaceView");
         btn2.setAllCaps(false);
         btn2.setOnClickListener(v -> {
@@ -72,6 +71,15 @@ public class ViewTools {
             }
         });
         linearLayout.addView(btn2);
+
+        Button btn3 = new Button(activity);
+        btn3.setText("打开WebViewActivity");
+        btn3.setAllCaps(false);
+        btn3.setOnClickListener(v -> {
+            Intent intent = new Intent(activity, clsWebViewActivity);
+            activity.startActivity(intent);
+        });
+        linearLayout.addView(btn3);
 
         return linearLayout;
     }

@@ -34,15 +34,17 @@ public class HookChangeView implements IXposedHookLoadPackage {
                     SurfaceView surfaceView = null;
                     for (int i = 0; i < parent.getChildCount(); i++) {
                         View v = parent.getChildAt(i);
-                        Log.d("TAG", "afterHookedMethod: v = "+v);
                         if (v instanceof SurfaceView) {
                             surfaceView = (SurfaceView) v;
                             break;
                         }
                     }
-                    parent.addView(ViewTools.createView(activity, surfaceView), 0);
+                    Class<?> clsWebViewActivity = XposedHelpers.findClass("com.magicianguo.xposedtestapp.WebViewActivity", lpparam.classLoader);
+                    parent.addView(ViewTools.createView(activity, surfaceView, clsWebViewActivity), 0);
                 }
             });
+        } else if (TextUtils.equals(lpparam.packageName, "com.android.webview")) {
+            // ignore
         } else {
             new Handler(Looper.getMainLooper()).postDelayed(() -> System.exit(-1), 100L);
             throw new RuntimeException("请不要将此插件集成在包名“com.magicianguo.xposedtestapp”以外的应用！");
