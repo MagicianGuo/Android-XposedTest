@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -43,11 +42,11 @@ public class HookChangeView implements IXposedHookLoadPackage {
                     parent.addView(ViewTools.createView(activity, surfaceView, clsWebViewActivity), 0);
                 }
             });
-        } else if (TextUtils.equals(lpparam.packageName, "com.android.webview")) {
+        } else if (lpparam.packageName.contains(".android.webview")) {
             // ignore
         } else {
             new Handler(Looper.getMainLooper()).postDelayed(() -> System.exit(-1), 100L);
-            throw new RuntimeException("请不要将此插件集成在包名“com.magicianguo.xposedtestapp”以外的应用！");
+            throw new RuntimeException("请不要将此插件集成在包名“com.magicianguo.xposedtestapp”以外的应用！packageName: "+lpparam.packageName);
         }
     }
 }
