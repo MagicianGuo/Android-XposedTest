@@ -1,0 +1,12 @@
+android {
+    applicationVariants.configureEach { variant ->
+        variant.assembleProvider.get().doLast {
+            variant.outputs.each { output ->
+                copy {
+                    from output.outputFile
+                    into file(rootDir.path + "/apks")
+                }
+            }
+        }
+    }
+}

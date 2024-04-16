@@ -4,6 +4,7 @@ plugins {
 }
 
 apply from: "../testks-sign.gradle"
+apply from: "../copy-apk.gradle"
 
 android {
     namespace 'com.magicianguo.xposedchangeview'
