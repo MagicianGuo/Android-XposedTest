@@ -15,7 +15,7 @@ public class HookAllowScreenshot implements IXposedHookLoadPackage {
         protected void beforeHookedMethod(MethodHookParam param) {
             Integer flags = (Integer) param.args[0];
             // 只把FLAG_SECURE移除，其他不受影响
-            param.args[0] = flags & (WindowManager.LayoutParams.FLAG_SECURE ^ Integer.MAX_VALUE);
+            param.args[0] = flags & (~WindowManager.LayoutParams.FLAG_SECURE);
         }
     };
 
