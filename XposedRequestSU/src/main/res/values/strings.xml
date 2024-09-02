@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">XposedRequestSU</string>
+    <string name="xposed_description">作用在目标应用上，应用启动时就会请求Root权限。</string>
+</resources>
