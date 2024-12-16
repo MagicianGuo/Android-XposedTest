@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">XposedShizukuCleaner</string>
+    <string name="xposed_description">作用在Shizuku上，激活成功后自动清理生成的文件/文件夹，防止被检测到。</string>
+</resources>
