@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">XposedJumpAppInterceptor</string>
+    <string name="xposed_description">在跳转其他应用前弹窗拦截，用户点击允许才能跳转。</string>
+</resources>
