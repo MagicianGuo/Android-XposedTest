@@ -13,54 +13,60 @@ import android.text.TextUtils;
 import java.lang.reflect.InvocationTargetException;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
+import de.robv.android.xposed.IXposedHookZygoteInit;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
-public class HookEntry implements IXposedHookLoadPackage {
+public class HookEntry implements IXposedHookLoadPackage, IXposedHookZygoteInit {
     private AlertDialog mDialog = null;
     private Activity mLastResumedActivity = null;
+    private String mPkgName = "";
+    private String mTargetPkgName = "";
     private String mLabel = "";
     private String mTargetLabel = "";
+    private Application.ActivityLifecycleCallbacks mActivityCallbacks = new Application.ActivityLifecycleCallbacks() {
+        @Override
+        public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+        }
+
+        @Override
+        public void onActivityStarted(Activity activity) {
+        }
+
+        @Override
+        public void onActivityResumed(Activity activity) {
+            mLastResumedActivity = activity;
+        }
+
+        @Override
+        public void onActivityPaused(Activity activity) {
+        }
+
+        @Override
+        public void onActivityStopped(Activity activity) {
+        }
+
+        @Override
+        public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+        }
+
+        @Override
+        public void onActivityDestroyed(Activity activity) {
+        }
+    };
 
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) {
+
         XposedHelpers.findAndHookMethod(Application.class, "onCreate", new XC_MethodHook() {
             @Override
             protected void afterHookedMethod(MethodHookParam param) {
                 Application application = (Application) param.thisObject;
-                application.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
-                    @Override
-                    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-                    }
-
-                    @Override
-                    public void onActivityStarted(Activity activity) {
-                    }
-
-                    @Override
-                    public void onActivityResumed(Activity activity) {
-                        mLastResumedActivity = activity;
-                    }
-
-                    @Override
-                    public void onActivityPaused(Activity activity) {
-                    }
-
-                    @Override
-                    public void onActivityStopped(Activity activity) {
-                    }
-
-                    @Override
-                    public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-                    }
-
-                    @Override
-                    public void onActivityDestroyed(Activity activity) {
-                    }
-                });
+                LogUtil.init(application);
+                application.registerActivityLifecycleCallbacks(mActivityCallbacks);
             }
         });
 
@@ -69,25 +75,8 @@ public class HookEntry implements IXposedHookLoadPackage {
                 new XC_MethodReplacement() {
                     @Override
                     protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
-                        Context context = (Context) param.thisObject;
-                        Intent intent = (Intent) param.args[0];
-
-                        ComponentName component = intent.getComponent();
-                        String pkgName = context.getPackageName();
-                        String targetPkgName;
-                        if (component != null) {
-                            targetPkgName = component.getPackageName();
-                        } else {
-                            targetPkgName = intent.getPackage();
-                        }
-                        if (!TextUtils.equals(pkgName, targetPkgName)) {
-                            PackageManager pm = context.getPackageManager();
-                            mLabel = pm.getApplicationLabel(pm.getApplicationInfo(pkgName, 0)).toString();
-                            mTargetLabel = pm.getApplicationLabel(pm.getApplicationInfo(targetPkgName, 0)).toString();
-                            showDialog(context, mLastResumedActivity, param);
-                        } else {
-                            invokeOriginalMethod(param, context);
-                        }
+                        LogUtil.writeLog("load method: ContextImpl - startActivity");
+                        resolveIntent(param);
                         return null;
                     }
                 });
@@ -96,40 +85,67 @@ public class HookEntry implements IXposedHookLoadPackage {
                 new XC_MethodReplacement() {
                     @Override
                     protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
-                        Activity activity = (Activity) param.thisObject;
-                        Intent intent = (Intent) param.args[0];
-
-                        ComponentName component = intent.getComponent();
-                        String pkgName = activity.getPackageName();
-                        String targetPkgName;
-                        if (component != null) {
-                            targetPkgName = component.getPackageName();
-                        } else {
-                            targetPkgName = intent.getPackage();
-                        }
-                        if (!TextUtils.equals(pkgName, targetPkgName)) {
-                            PackageManager pm = activity.getPackageManager();
-                            mLabel = pm.getApplicationLabel(pm.getApplicationInfo(pkgName, 0)).toString();
-                            mTargetLabel = pm.getApplicationLabel(pm.getApplicationInfo(targetPkgName, 0)).toString();
-                            showDialog(activity, activity, param);
-                        } else {
-                            invokeOriginalMethod(param, activity);
-                        }
+                        LogUtil.writeLog("load method: Activity - startActivityForResult");
+                        resolveIntent(param);
                         return null;
                     }
                 });
+    }
+
+    @Override
+    public void initZygote(StartupParam startupParam) {
+        ResourceUtil.initZygote(startupParam);
+    }
+
+    private void resolveIntent(XC_MethodHook.MethodHookParam param) throws PackageManager.NameNotFoundException {
+        Context context = (Context) param.thisObject;
+        Intent intent = (Intent) param.args[0];
+        boolean isActivity = context instanceof Activity;
+        LogUtil.writeLog("context = " + context + " , isActivity? " + isActivity + " , intent = " + intent);
+
+        ComponentName component = intent.getComponent();
+        mPkgName = context.getPackageName();
+        if (component != null) {
+            mTargetPkgName = component.getPackageName();
+        } else {
+            mTargetPkgName = intent.getPackage();
+        }
+        LogUtil.writeLog("pkgName = " + mPkgName + " , targetPkgName = " + mTargetPkgName);
+        if (!TextUtils.equals(mPkgName, mTargetPkgName)) {
+            PackageManager pm = context.getPackageManager();
+            mLabel = pm.getApplicationLabel(pm.getApplicationInfo(mPkgName, 0)).toString();
+            if (mTargetPkgName != null) {
+                mTargetLabel = pm.getApplicationLabel(pm.getApplicationInfo(mTargetPkgName, 0)).toString();
+            }
+            if (isActivity) {
+                showDialog(context, (Activity) context, param);
+            } else {
+                showDialog(context, mLastResumedActivity, param);
+            }
+        } else {
+            invokeOriginalMethod(param, context);
+        }
     }
 
     private synchronized void showDialog(Object object, Activity activity, XC_MethodHook.MethodHookParam param) {
         if (mDialog != null && mDialog.isShowing()) {
             mDialog.dismiss();
         }
-        mDialog = new AlertDialog.Builder(activity)
-                .setMessage(String.format("“%s”想要跳转到“%s”，是否允许？", mLabel, mTargetLabel))
+        String msg;
+        if (mTargetLabel != null && !mTargetLabel.isEmpty()) {
+            msg = String.format("“%s”想要跳转到“%s”，是否允许？", mLabel, mTargetLabel);
+        } else {
+            msg = String.format("“%s”想要跳转到其他应用，是否允许？", mLabel);
+        }
+        LogUtil.writeLog("showDialog: msg = " + msg);
+        ResourceUtil.addModuleAssetPath(activity);
+        mDialog = new AlertDialog.Builder(activity, R.style.CommonDialog)
+                .setMessage(msg)
                 .setPositiveButton("允许", (dialog, which) -> {
                     invokeOriginalMethod(param, object);
                 })
-                .setNegativeButton("禁止", (dialog, which) -> {})
+                .setNegativeButton("禁止", (dialog, which) -> {
+                })
                 .create();
         mDialog.show();
     }
@@ -139,6 +155,7 @@ public class HookEntry implements IXposedHookLoadPackage {
             XposedBridge.invokeOriginalMethod(param.method, obj, param.args);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
+            LogUtil.writeLog("invokeOriginalMethod: error! e = " + e.getMessage());
         }
     }
 
