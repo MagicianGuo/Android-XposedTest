@@ -15,3 +15,11 @@ XposedTestApp模块是需要测试的应用，提供了简单的界面，但是�
 安装XposedChangeView模块并集成后可以在Activity布局中插入一块View，能够实现简单的跳页和控制其它View功能。
 
 安装XposedLogWebViewUrl模块并集成后可以记录此应用的WebView加载过的网页链接，并保存到“/sdcard/Android/data/[应用包名]”路径下的文件“url_list.txt”中。
+
+# 三、其他模块（需Root，配合LSPosed模块）
+
+XposedRequestSU：勾选的应用会在启动时主动请求Root权限。
+
+XposedShizukuCleaner：勾选Shizuku，能够自动清理激活时产生的残留文件，防止被检测。
+
+XposedJumpAppInterceptor：勾选的应用，在跳转到其他应用时会被拦截，提示弹窗，点击允许才能跳转。
