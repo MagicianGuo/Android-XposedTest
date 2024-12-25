@@ -8,12 +8,12 @@ apply from: "../copy-apk.gradle"
 
 android {
     namespace 'com.magicianguo.xposedchangeview'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.magicianguo.xposedchangeview"
         minSdk 24
-        targetSdk 34
+        targetSdk 35
         versionCode 1
         versionName "1.0"
 

@@ -8,11 +8,12 @@ apply from: "../copy-apk.gradle"
 
 android {
     namespace 'com.magicianguo.xposedallowscreenshot'
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.magicianguo.xposedallowscreenshot"
         minSdk 24
-        targetSdk 34
+        targetSdk 35
         versionCode 1
         versionName "1.0"
 
@@ -25,7 +26,6 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-    compileSdk 34
 }
 
 dependencies {
