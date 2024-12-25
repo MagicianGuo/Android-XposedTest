@@ -138,6 +138,7 @@ public class HookEntry implements IXposedHookLoadPackage, IXposedHookZygoteInit 
         } else {
             msg = String.format("“%s”想要跳转到其他应用，是否允许？\n" + mIntent, mLabel);
         }
+        mTargetLabel = "";
         LogUtil.writeLog("showDialog: msg = " + msg);
         ResourceUtil.addModuleAssetPath(activity);
         mDialog = new AlertDialog.Builder(activity, R.style.CommonDialog)
