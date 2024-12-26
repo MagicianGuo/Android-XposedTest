@@ -7,14 +7,14 @@ apply from: "../copy-apk.gradle"
 
 android {
     namespace 'com.magicianguo.xposedshizukucleaner'
-    compileSdk 35
+    compileSdk COMPILE_SDK.toInteger()
 
     defaultConfig {
         applicationId "com.magicianguo.xposedshizukucleaner"
-        minSdk 24
-        targetSdk 35
-        versionCode 1
-        versionName "1.0"
+        minSdk MIN_SDK.toInteger()
+        targetSdk TARGET_SDK.toInteger()
+        versionCode VERSION_CODE.toInteger()
+        versionName VERSION_NAME
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
